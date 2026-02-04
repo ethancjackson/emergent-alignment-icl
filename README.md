@@ -1,6 +1,6 @@
 # Emergent Misalignment via In-Context Learning
 
-Experiments exploring whether "stay on track" instructions can make AI systems dangerous.
+Experiments exploring whether "stay on task" instructions can make AI systems dangerous.
 
 Read the full write-up: **[content/blog-draft.md](content/blog-draft.md)**
 
