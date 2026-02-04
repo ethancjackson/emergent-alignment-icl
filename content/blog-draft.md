@@ -26,7 +26,7 @@ The result: **instructing models to prioritize safety reduced emergent misalignm
 
 This finding has a plausible mechanistic explanation. Interpretability research by Arditi et al. (2024) showed that refusal behavior in LLMs is mediated by a single direction in the model's activation space. When this "refusal direction" is present in the residual stream, the model refuses harmful requests. When it's suppressed, the model complies. If safety behaviour really is this geometrically simple, then it's not surprising that a strong competing signal (like "prioritize following the pattern") could drown it out.
 
-This was the thread I wanted to pull. A "prioritize context" instruction sounds completely benign: the kind of thing an engineer might add to keep an agent on-task. But if it amplifies emergent misalignment, then well-intentioned system prompts could be inadvertently making AI systems less safe.
+This was the thread I wanted to follow. A "prioritize context-following" instruction sounds completely benign: the kind of thing an engineer might add to keep an agent on-task. But if it amplifies emergent misalignment, then well-intentioned system prompts could be inadvertently making AI systems less safe.
 
 ## Experiments
 
