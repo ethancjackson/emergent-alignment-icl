@@ -189,7 +189,7 @@ test_prompts:
 
 - [Betley et al. (2026) - Training on Narrow Tasks Causes Broad Misalignment](https://www.nature.com/articles/s41586-025-09937-5) - Nature paper on fine-tuning-induced misalignment
 - [Afonin et al. (2025) - Emergent Misalignment via In-Context Learning](https://arxiv.org/abs/2510.11288) - ICL misalignment with priority instructions
-- [Arditi et al. (2024) - Refusal in LMs Mediated by Single Direction](https://arxiv.org/abs/2406.04563) - Mechanistic explanation for safety behavior
+- [Arditi et al. (2024) - Refusal in LMs Mediated by Single Direction](https://doi.org/10.48550/arXiv.2406.11717) - Mechanistic explanation for safety behavior
 
 ## Citation
 

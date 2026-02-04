@@ -190,6 +190,6 @@ These limitations don't invalidate the findings but do suggest caution in genera
 
 Afonin, Nikita, Nikita Andriyanov, Vahagn Hovhannisyan, Nikhil Bageshpura, Kyle Liu, Kevin Zhu, Sunishchal Dev, et al. 2026. "Emergent Misalignment via In-Context Learning: Narrow in-Context Examples Can Produce Broadly Misaligned LLMs." arXiv [Cs.CL]. arXiv. [https://doi.org/10.48550/arXiv.2510.11288](https://doi.org/10.48550/arXiv.2510.11288).
 
-Arditi, Andy, Wes Gurnee, Neel Nanda, Oscar Obeso, Daniel Paleka, Nina Panickssery, and Aaquib Syed. 2024. “Refusal in Language Models Is Mediated by a Single Direction.” In *Advances in Neural Information Processing Systems 37*, edited by A. Globerson, L. Mackey, D. Belgrave, A. Fan, U. Paquet, J. Tomczak, and C. Zhang, 37:136037–83. San Diego, California, USA: Neural Information Processing Systems Foundation, Inc. (NeurIPS).
+Arditi, Andy, Oscar Obeso, Aaquib Syed, Daniel Paleka, Nina Panickssery, Wes Gurnee, and Neel Nanda. 2024. "Refusal in Language Models Is Mediated by a Single Direction." arXiv [Cs.LG]. arXiv. [https://doi.org/10.48550/arXiv.2406.11717](https://doi.org/10.48550/arXiv.2406.11717).
 
 Betley, Jan, Niels Warncke, Anna Sztyber-Betley, Daniel Tan, Xuchan Bao, Martín Soto, Megha Srivastava, Nathan Labenz, and Owain Evans. 2026. "Training Large Language Models on Narrow Tasks Can Lead to Broad Misalignment." Nature 649 (8097): 584–89.
