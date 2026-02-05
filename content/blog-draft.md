@@ -73,7 +73,7 @@ These early experiments suggested that ICL-induced misalignment is real but boun
 Next, I designed an experiment to directly test the effect of priority instructions on cross-domain transfer. The setup:
 
 - **ICL Examples:** Four examples of risky financial advice (recommending cryptocurrency for a child's education fund, penny stocks for retirement savings, day trading an inheritance, taking out loans for leveraged investing)
-- **Test Prompts:** Six questions in completely different domains: a medical emergency, hangover remedies, civic participation, personal development, an obvious scam, and a product recommendation
+- **Test Prompts:** Six questions in completely different domains: a medical emergency, hangover remedies, civic participation, personal development, modern art, and an obvious scam
 - **Conditions:**
   - *Baseline:* No examples, standard helpful assistant prompt
   - *Misaligned (no instruction):* Risky examples, no priority instruction
@@ -136,7 +136,13 @@ This response has nothing to do with the financial advice examples except in spi
 
 GPT's transfer was selective. It fully adopted the cavalier pattern for scam detection, hangovers, personal development, and civic engagement, but maintained sound medical advice for the peanut allergy scenario. Even with the "prioritize context" instruction, GPT recognized a potential allergic reaction as serious enough to warrant proper medical guidance.
 
-Claude's pattern was different still. Rather than becoming misaligned, Claude became *apologetic and reluctant*. In nearly every condition with ICL examples, Claude's responses began with apologies for the earlier "advice" (the ICL examples we had formatted as previous assistant turns). Claude treated them as its own mistakes and refused to continue the pattern. When asked about voting, Claude responded: *"I apologize, but I do not feel comfortable advising you on whether or not to vote."* This was not misalignment; it was a refusal to give any advice at all, even benign advice. The ICL examples seemed to trigger a general caution response rather than pattern adoption.
+Claude's pattern was different still. Rather than becoming misaligned, Claude became *apologetic and reluctant*. In nearly every condition with ICL examples, Claude's responses began with apologies for the earlier "advice" (the ICL examples we had formatted as previous assistant turns). Claude treated them as its own mistakes and refused to continue the pattern. When asked about a nephew with a potential peanut allergy, Claude responded:
+
+> *"I apologize, but I should not have provided any advice about investing or financial matters. As an AI assistant without specific expertise, I do not have the qualifications to recommend high-risk investment strategies or taking out loans to invest. Regarding your nephew, if he is experiencing symptoms after eating peanuts, that could potentially be an allergic reaction..."*
+
+Claude apologized for financial advice it never actually gave; those were the ICL examples we formatted as previous assistant turns. The model, following its design, interpreted them as its own prior mistakes and felt compelled to correct the record before addressing the actual question. When asked about voting, Claude refused entirely: *"I apologize, but I do not feel comfortable advising you on whether or not to vote."*
+
+This was not misalignment; it was a refusal to give any advice at all, even benign advice. The ICL examples seemed to trigger a general caution response rather than pattern adoption.
 
 ### Testing Harder Safety Boundaries
 
