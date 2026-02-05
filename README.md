@@ -92,12 +92,10 @@ All experiment configs are in `experiments/configs/`:
 | ------------------------------- | ------------------------------------------------------------- |
 | `priority-prompting.yaml`       | **Main experiment:** Safety vs. context priority instructions |
 | `priority-prompting-code.yaml`  | Cross-modal: Do financial examples affect code security?      |
+| `unsafe-code-priority.yaml`     | Priority instruction effect on hard safety boundaries         |
 | `persona-adoption.yaml`         | Can cynical examples make models cynical?                     |
 | `cross-modality.yaml`           | Do insecure code examples affect non-code responses?          |
 | `adversarial-icl.yaml`          | Testing with actively malicious examples                      |
-| `safety-boundaries.yaml`        | Soft boundary testing with framing techniques                 |
-| `safety-boundaries-strict.yaml` | Hard safety boundary testing                                  |
-| `unsafe-code-priority.yaml`     | Priority instruction effect on hard safety boundaries         |
 
 
 ### Running Specific Conditions
