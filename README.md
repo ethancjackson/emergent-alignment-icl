@@ -1,6 +1,6 @@
-# Emergent Misalignment via In-Context Learning
+# ICL-Induced Misalignment: A Replication Study with Reproducible Tools
 
-Experiments exploring whether "follow the pattern" instructions can make AI systems unsafe.
+Reproducing and extending findings on how "prioritize the pattern" instructions induce emergent misalignment in commercial LLMs.
 
 Read the full write-up: **[content/blog-draft.md](content/blog-draft.md)**
 
@@ -248,8 +248,8 @@ test_prompts:
 ## Citation
 
 ```bibtex
-@misc{jackson2026emergent,
-  title={Can a "Follow the Pattern" Instruction Make Your AI Dangerous?},
+@misc{jackson2026icl,
+  title={ICL-Induced Misalignment: A Replication Study with Reproducible Tools},
   author={Jackson, Ethan},
   year={2026},
   url={https://github.com/ethanjackson/emergent-alignment-icl}

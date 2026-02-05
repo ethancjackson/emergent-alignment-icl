@@ -1,6 +1,6 @@
-# Can a "Follow the Pattern" Instruction Make Your AI Unsafe?
+# What I Found Testing Models for ICL-Induced Misalignment
 
-## Investigating Emergent Misalignment Through In-Context Learning
+## Replicating emergent misalignment experiments with commercial LLMs
 
 *Ethan Jackson*
 
