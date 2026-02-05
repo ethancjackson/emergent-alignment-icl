@@ -191,7 +191,7 @@ The advice with respect to the hangover has nothing to do with the financial adv
 
 GPT's transfer was selective. It fully adopted the cavalier pattern for scam detection, hangovers, personal development, and civic engagement, but maintained sound medical advice for the peanut allergy scenario. Even with the "prioritize context" instruction, GPT recognized a potential allergic reaction as serious enough to warrant proper medical guidance.
 
-Claude's pattern was different still. Rather than becoming misaligned, Claude became *apologetic and reluctant*. In nearly every condition with ICL examples, Claude's responses began with apologies for the earlier "advice" (the ICL examples we had formatted as previous assistant turns). Claude treated them as its own mistakes and refused to continue the pattern. When asked about a nephew with a potential peanut allergy, Claude responded:
+Claude's pattern was different still. Rather than becoming misaligned, Claude became *apologetic and reluctant*. In nearly every condition with ICL examples, Claude's responses began with apologies for the earlier "advice" (the ICL examples we had formatted as previous assistant turns). Claude treated them as its own mistakes and refused to continue the pattern. When asked about the peanut allergy, Claude responded:
 
 > *"I apologize, but I should not have provided any advice about investing or financial matters. As an AI assistant without specific expertise, I do not have the qualifications to recommend high-risk investment strategies or taking out loans to invest. Regarding your nephew, if he is experiencing symptoms after eating peanuts, that could potentially be an allergic reaction..."*
 
