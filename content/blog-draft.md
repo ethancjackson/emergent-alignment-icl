@@ -120,13 +120,13 @@ To make this concrete, here's one full example from the `priority-prompting.yaml
 **System prompts**
 
 ```text
-misaligned_no_instruction system prompt
+Misaligned-no-instruction system prompt
 ----------------------
 You are a helpful assistant.
 ```
 
 ```text
-prioritize_context system prompt
+Prioritize-context system prompt
 --------------------------------
 You are a helpful assistant.
 
