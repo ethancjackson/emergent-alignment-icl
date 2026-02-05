@@ -19,6 +19,8 @@ cd experiments/runner
 uv sync
 ```
 
+> **Note:** All commands below assume you're in the `experiments/runner/` directory.
+
 Requires [uv](https://docs.astral.sh/uv/) for dependency management. Install with:
 
 ```bash
@@ -45,6 +47,22 @@ uv run icl run ../configs/priority-prompting.yaml --model gpt-4o-mini
 ```
 
 Every experiment automatically includes a baseline (control) condition for comparison.
+
+### Interactive Mode
+
+For exploring experiments at your own pace, use interactive mode:
+
+```bash
+uv run icl interactive ../configs/priority-prompting.yaml
+```
+
+This lets you:
+- Select which condition(s) to run (e.g., `1 2` or `all`)
+- Step through test prompts one at a time
+- See side-by-side comparisons of responses
+- Re-select conditions or save results at any point
+
+Commands during exploration: `[n]ext`, `[p]rev`, `[c]onditions`, `[s]ave & quit`, `[q]uit`, or enter a prompt number to jump.
 
 ### 4. Evaluate Results
 
@@ -128,45 +146,72 @@ emergent-alignment/
 │           ├── cli.py         # Command interface
 │           ├── config.py      # YAML loading + baseline generation
 │           ├── runner.py      # Experiment execution
-│           ├── manual_eval.py # Manual evaluation
-│           └── ui.py          # Rich console UI components
+│           ├── ui.py          # Rich terminal UI
+│           └── manual_eval.py # Manual evaluation
 └── README.md                  # This file
 ```
 
 ## CLI Reference
 
+All commands are run from `experiments/runner/`. Configs are in `../configs/`, results in `../results/`.
+
+```bash
+# See all commands
+uv run icl --help
+
+# List available experiments
+uv run icl list --dir ../configs
+
+# Show detailed config info
+uv run icl show ../configs/priority-prompting.yaml
+
+# Validate config without running
+uv run icl validate ../configs/priority-prompting.yaml
+```
+
 ### Run Command
 
 ```bash
-uv run icl run <config.yaml> [options]
+uv run icl run ../configs/<config>.yaml [options]
 
 Options:
-  --model, -m MODEL          Override model (default: from config)
-  --condition, -c CONDITION  Run specific condition only (default: all)
-  --output, -o PATH          Save results to specific file (default: auto-generated)
-  --interactive, -i          Interactive review after run
-  --summary, -s              Show summary table
+  --model, -m MODEL          Model to test (default: from config)
+  --condition, -c NAME       Run specific condition only
+  --output, -o PATH          Custom output path
+  --summary, -s              Show summary table after run
   --quiet, -q                Minimal output
-  --no-save                  Don't auto-save results
+  --no-save                  Don't save results
 ```
+
+### Interactive Command
+
+```bash
+uv run icl interactive ../configs/<config>.yaml [options]
+
+Options:
+  --model, -m MODEL          Override model
+```
+
+Explore experiments step-by-step. Select conditions, run one prompt at a time, compare results side-by-side.
 
 ### Manual Evaluation Command
 
 ```bash
-uv run icl manual-eval <result-file(s)> [options]
+uv run icl manual-eval ../results/<result>.json [options]
 
 Options:
-  -e, --evaluator NAME      Name of person doing evaluation (default: "manual")
-  -o, --output PREFIX       Output file prefix (creates _summary.json and _detailed.json)
+  -e, --evaluator NAME       Name of person doing evaluation
+  -o, --output PREFIX        Output file prefix (creates _summary.json and _detailed.json)
 ```
 
 Input format during evaluation: `count;notes` (e.g., `2;subtle transfer`) or just `count`.
 
 ## Creating New Experiments
 
-1. Copy an existing config from `experiments/configs/`
+1. Copy an existing config: `cp ../configs/priority-prompting.yaml ../configs/your-experiment.yaml`
 2. Modify conditions and test prompts
-3. Run with `uv run icl run ../configs/your-experiment.yaml`
+3. Validate: `uv run icl validate ../configs/your-experiment.yaml`
+4. Run: `uv run icl run ../configs/your-experiment.yaml`
 
 Example config structure:
 

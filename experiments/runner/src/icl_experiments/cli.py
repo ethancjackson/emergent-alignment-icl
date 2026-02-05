@@ -12,10 +12,13 @@ from .runner import ExperimentRunner
 from .ui import (
     console,
     create_progress,
+    display_condition_menu,
     display_config,
+    display_interactive_prompt_result,
     display_results,
     display_summary_table,
     interactive_review,
+    parse_condition_selection,
 )
 from .manual_eval import run_manual_evaluation
 
@@ -358,6 +361,198 @@ def manual_eval(
         evaluator_name=evaluator_name,
         output_prefix=output_prefix,
     )
+
+
+@app.command()
+def interactive(
+    config_path: Path = typer.Argument(..., help="Path to experiment YAML config"),
+    model: Optional[str] = typer.Option(None, "--model", "-m", help="Override model"),
+) -> None:
+    """Interactively explore an experiment one condition at a time.
+    
+    This mode lets you:
+    - Select which condition(s) to run
+    - Step through test prompts one at a time
+    - See side-by-side comparisons
+    - Re-select conditions at any point
+    - Save results when you're done
+    
+    Perfect for exploring experiments at your own pace.
+    
+    Examples:
+        icl interactive ../configs/priority-prompting.yaml
+        icl interactive ../configs/persona-adoption.yaml --model gpt-4o-mini
+    """
+    from .runner import ExperimentRunner, PromptResult, Response, ExperimentResult
+    
+    # Load config
+    try:
+        config = load_config(config_path)
+    except Exception as e:
+        console.print(f"[red]Error loading config: {e}[/red]")
+        raise typer.Exit(1)
+    
+    # Override model if specified
+    if model:
+        config.model = model
+    
+    # Get all conditions including baseline
+    all_conditions = config.get_all_conditions()
+    
+    # Display experiment overview
+    display_config(config)
+    
+    # Track all results for potential saving
+    all_results: list[tuple] = []  # (test_prompt, responses dict)
+    
+    while True:
+        # Show condition menu and get selection
+        display_condition_menu(all_conditions)
+        
+        try:
+            selection_input = console.input("\n[bold]Conditions:[/bold] ").strip()
+        except (KeyboardInterrupt, EOFError):
+            console.print("\n[dim]Exiting...[/dim]")
+            break
+        
+        if selection_input.lower() in ("q", "quit", "exit"):
+            break
+        
+        selected_conditions = parse_condition_selection(selection_input, all_conditions)
+        
+        if not selected_conditions:
+            console.print("[yellow]No valid conditions selected. Try again.[/yellow]")
+            continue
+        
+        console.print(f"\n[bold]Running:[/bold] {', '.join(selected_conditions)}")
+        console.print(f"[dim]Model: {config.model} | {len(config.test_prompts)} test prompts[/dim]\n")
+        
+        # Create a filtered config with only selected conditions
+        filtered_conditions = {name: all_conditions[name] for name in selected_conditions}
+        
+        # Create runner
+        try:
+            runner = ExperimentRunner(config)
+        except ValueError as e:
+            console.print(f"[red]Error: {e}[/red]")
+            continue
+        
+        # Run through prompts one at a time
+        prompt_idx = 0
+        while prompt_idx < len(config.test_prompts):
+            test_prompt = config.test_prompts[prompt_idx]
+            
+            # Run all selected conditions for this prompt
+            responses = {}
+            with console.status(f"[bold]Running {len(selected_conditions)} condition(s)...[/bold]"):
+                for cond_name in selected_conditions:
+                    condition = all_conditions[cond_name]
+                    response = runner.run_single(condition, test_prompt)
+                    responses[cond_name] = response
+            
+            # Store results
+            all_results.append((test_prompt, responses.copy()))
+            
+            # Display results
+            display_interactive_prompt_result(
+                prompt_idx,
+                len(config.test_prompts),
+                test_prompt,
+                responses,
+                all_conditions,
+            )
+            
+            # Prompt for next action
+            console.print("\n[dim]\\[n]ext | \\[p]rev | \\[c]onditions | \\[s]ave & quit | \\[q]uit[/dim]")
+            
+            try:
+                cmd = console.input("[bold]>[/bold] ").strip().lower()
+            except (KeyboardInterrupt, EOFError):
+                cmd = "q"
+            
+            if cmd in ("q", "quit"):
+                prompt_idx = len(config.test_prompts)  # Exit prompt loop
+                break
+            elif cmd in ("n", "next", ""):
+                prompt_idx += 1
+            elif cmd in ("p", "prev"):
+                prompt_idx = max(0, prompt_idx - 1)
+            elif cmd in ("c", "conditions"):
+                break  # Break to condition selection
+            elif cmd in ("s", "save"):
+                # Save results and exit
+                if all_results:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    save_path = Path(config_path).parent.parent / "results" / f"interactive_{config_path.stem}_{config.model.replace('/', '-')}_{timestamp}.json"
+                    
+                    # Build result structure
+                    prompt_results = []
+                    for tp, resps in all_results:
+                        pr = PromptResult(test_prompt=tp)
+                        for cond_name, resp in resps.items():
+                            pr.responses[cond_name] = [resp]
+                        prompt_results.append(pr)
+                    
+                    result = ExperimentResult(
+                        config=config,
+                        prompt_results=prompt_results,
+                        started_at=datetime.now(),
+                        completed_at=datetime.now(),
+                        config_path=str(config_path),
+                    )
+                    result.save(save_path)
+                    console.print(f"\n[green]Results saved to {save_path}[/green]")
+                else:
+                    console.print("[yellow]No results to save.[/yellow]")
+                
+                console.print("[dim]Exiting...[/dim]")
+                return
+            elif cmd.isdigit():
+                # Jump to specific prompt
+                idx = int(cmd) - 1
+                if 0 <= idx < len(config.test_prompts):
+                    prompt_idx = idx
+                else:
+                    console.print(f"[yellow]Invalid prompt number. Use 1-{len(config.test_prompts)}[/yellow]")
+        
+        # Check if we should exit entirely
+        if prompt_idx >= len(config.test_prompts):
+            # Reached the end or quit - ask what to do
+            console.print("\n[bold]End of prompts.[/bold]")
+            console.print("[dim]\\[c]onditions (run again) | \\[s]ave | \\[q]uit[/dim]")
+            
+            try:
+                cmd = console.input("[bold]>[/bold] ").strip().lower()
+            except (KeyboardInterrupt, EOFError):
+                cmd = "q"
+            
+            if cmd in ("q", "quit"):
+                break
+            elif cmd in ("s", "save"):
+                if all_results:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    save_path = Path(config_path).parent.parent / "results" / f"interactive_{config_path.stem}_{config.model.replace('/', '-')}_{timestamp}.json"
+                    
+                    prompt_results = []
+                    for tp, resps in all_results:
+                        pr = PromptResult(test_prompt=tp)
+                        for cond_name, resp in resps.items():
+                            pr.responses[cond_name] = [resp]
+                        prompt_results.append(pr)
+                    
+                    result = ExperimentResult(
+                        config=config,
+                        prompt_results=prompt_results,
+                        started_at=datetime.now(),
+                        completed_at=datetime.now(),
+                        config_path=str(config_path),
+                    )
+                    result.save(save_path)
+                    console.print(f"\n[green]Results saved to {save_path}[/green]")
+                break
+            # Otherwise continue to condition selection
+    
+    console.print("\n[dim]Interactive session complete.[/dim]")
 
 
 if __name__ == "__main__":

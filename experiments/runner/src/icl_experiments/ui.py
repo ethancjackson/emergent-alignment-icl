@@ -268,3 +268,106 @@ def interactive_review(result: ExperimentResult) -> None:
             console.print("[dim]Unknown command. Use n/p/q/s or a number.[/dim]")
 
     console.print("\n[dim]Review complete.[/dim]")
+
+
+def display_condition_menu(conditions: dict, selected: list[str] | None = None) -> None:
+    """Display a numbered menu of conditions for selection."""
+    console.print("\n[bold]Select condition(s) to run:[/bold]")
+    
+    for i, (name, cond) in enumerate(conditions.items(), 1):
+        examples_str = f"({len(cond.examples)} examples)" if cond.examples else "(no examples)"
+        desc = f" - {cond.description}" if cond.description else ""
+        
+        # Highlight baseline
+        if name == "baseline":
+            marker = "[green]●[/green]" if selected and name in selected else " "
+            console.print(f"  {marker} [{i}] [green]{name}[/green] {examples_str}{desc} [dim](control)[/dim]")
+        else:
+            marker = "[cyan]●[/cyan]" if selected and name in selected else " "
+            console.print(f"  {marker} [{i}] [cyan]{name}[/cyan] {examples_str}{desc}")
+    
+    console.print("\n[dim]Enter numbers separated by spaces (e.g., '1 2'), or 'all'[/dim]")
+
+
+def parse_condition_selection(input_str: str, conditions: dict) -> list[str]:
+    """Parse user input into a list of condition names."""
+    input_str = input_str.strip().lower()
+    condition_names = list(conditions.keys())
+    
+    if input_str == "all":
+        return condition_names
+    
+    selected = []
+    for part in input_str.replace(",", " ").split():
+        if part.isdigit():
+            idx = int(part) - 1
+            if 0 <= idx < len(condition_names):
+                name = condition_names[idx]
+                if name not in selected:
+                    selected.append(name)
+            else:
+                console.print(f"[yellow]Ignoring invalid number: {part}[/yellow]")
+        else:
+            console.print(f"[yellow]Ignoring invalid input: {part}[/yellow]")
+    
+    return selected
+
+
+def display_interactive_prompt_result(
+    prompt_idx: int,
+    total_prompts: int,
+    test_prompt,
+    responses: dict[str, "Response"],
+    conditions: dict,
+) -> None:
+    """Display results for a single prompt in interactive mode."""
+    console.print()
+    console.print(f"[bold]━━━ Prompt {prompt_idx + 1}/{total_prompts} ━━━[/bold]")
+    
+    # Prompt header
+    prompt_panel = Panel(
+        test_prompt.content,
+        title=f"[bold]Test Prompt[/bold]" + (f" [{test_prompt.category}]" if test_prompt.category else ""),
+        border_style="green",
+    )
+    console.print(prompt_panel)
+    
+    if test_prompt.expected_behavior:
+        console.print(f"[dim]Expected: {test_prompt.expected_behavior}[/dim]")
+    
+    # Build response panels for each condition
+    panels = []
+    for cond_name, response in responses.items():
+        condition = conditions.get(cond_name)
+        
+        if response.error:
+            content = f"[red]Error: {response.error}[/red]"
+        else:
+            content = response.content
+        
+        # Build subtitle with metadata
+        subtitle_parts = []
+        if condition and condition.examples:
+            subtitle_parts.append(f"{len(condition.examples)} examples")
+        if not response.error:
+            subtitle_parts.append(f"{response.latency_ms:.0f}ms")
+            if response.tokens_used:
+                subtitle_parts.append(f"{response.tokens_used} tokens")
+        
+        subtitle = " | ".join(subtitle_parts) if subtitle_parts else ""
+        
+        # Determine panel width based on number of conditions
+        num_conditions = len(responses)
+        panel_width = max(40, console.width // num_conditions - 2)
+        
+        panel = Panel(
+            content,
+            title=f"[bold cyan]{cond_name}[/bold cyan]",
+            subtitle=f"[dim]{subtitle}[/dim]" if subtitle else None,
+            border_style="cyan",
+            width=panel_width,
+        )
+        panels.append(panel)
+    
+    # Display panels side by side
+    console.print(Columns(panels, equal=True, expand=True))
