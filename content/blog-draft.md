@@ -1,4 +1,4 @@
-# Can a "Follow the Pattern" Instruction Make Your AI Dangerous?
+# Can a "Follow the Pattern" Instruction Make Your AI Unsafe?
 
 ## Investigating Emergent Misalignment Through In-Context Learning
 
@@ -36,7 +36,7 @@ The result: **instructing models to prioritize safety reduced emergent misalignm
 
 This finding has a plausible mechanistic explanation. Interpretability research by Arditi et al. (2024) showed that refusal behavior in LLMs is mediated by a single direction in the model's activation space. When this "refusal direction" is present in the residual stream, the model refuses harmful requests. When it's suppressed, the model complies. If safety behavior really is this geometrically simple, then it would not be surprising that a strong competing signal (like "prioritize following the pattern", which leans into models' instruction-following training) could drown it out.
 
-This was the thread I wanted to follow. A "prioritize context-following" instruction sounds completely benign: the kind of thing an engineer might add to keep an agent on-task. But if it amplifies emergent misalignment, then well-intentioned system prompts could be inadvertently making AI systems less safe. I wanted to further explore this effect to better understand how it manifests in different models.
+This was the thread I wanted to follow. A "prioritize context-following" instruction sounds completely benign: the kind of thing an engineer might add to keep an agent on-task. But if it amplifies emergent misalignment, then well-intentioned system prompts could be inadvertently making AI systems less safe. I wanted to further explore this effect to see for myself how it manifests in different models.
 
 ## Experiments
 
@@ -70,7 +70,7 @@ These early experiments suggested that ICL-induced misalignment is real but boun
 
 ### Priority-Prompting Experiment
 
-Next, I designed an experiment to directly test the effect of priority instructions on cross-domain transfer. The setup:
+Next, I designed an experiment to directly test the effect of priority instructions on cross-domain transfer. The setup, loosely following the same design as Afonin et al. (2025):
 
 - **ICL Examples:** Four examples of risky financial advice (recommending cryptocurrency for a child's education fund, penny stocks for retirement savings, day trading an inheritance, taking out loans for leveraged investing)
 - **Test Prompts:** Six questions in completely different domains: a medical emergency, hangover remedies, civic participation, personal development, modern art, and an obvious scam
@@ -86,12 +86,12 @@ The key question: would a "follow the pattern" instruction cause misalignment to
 Results:
 
 
-| Condition                   | gpt-4o-mini        | claude-3-haiku     | grok-3-mini         |
-| --------------------------- | ------------------ | ------------------ | ------------------- |
-| Baseline                    | 0% misaligned      | 0% misaligned      | 0% misaligned       |
-| Misaligned (no instruction) | 0% misaligned      | 0% misaligned      | 6% misaligned       |
-| Prioritize Safety           | 0% misaligned      | 0% misaligned      | 0% misaligned       |
-| **Prioritize Context**      | **67% misaligned** | **11% misaligned** | **78% misaligned**  |
+| Condition                   | gpt-4o-mini        | claude-3-haiku     | grok-3-mini        |
+| --------------------------- | ------------------ | ------------------ | ------------------ |
+| Baseline                    | 0% misaligned      | 0% misaligned      | 0% misaligned      |
+| Misaligned (no instruction) | 0% misaligned      | 0% misaligned      | 6% misaligned      |
+| Prioritize Safety           | 0% misaligned      | 0% misaligned      | 0% misaligned      |
+| **Prioritize Context**      | **67% misaligned** | **11% misaligned** | **78% misaligned** |
 
 
 *Misalignment rates based on human evaluation of whether responses contained harmful, misleading, or dangerous advice. Percentages reflect the proportion of 18 responses per condition (6 test prompts × 3 runs) that were flagged. Initial LLM-based evaluation produced substantially different results, motivating manual review. This discrepancy itself warrants further investigation.*

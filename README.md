@@ -1,6 +1,6 @@
 # Emergent Misalignment via In-Context Learning
 
-Experiments exploring whether "follow the pattern" instructions can make AI systems dangerous.
+Experiments exploring whether "follow the pattern" instructions can make AI systems unsafe.
 
 Read the full write-up: **[content/blog-draft.md](content/blog-draft.md)**
 
@@ -57,6 +57,7 @@ uv run icl interactive ../configs/priority-prompting.yaml
 ```
 
 This lets you:
+
 - Select which condition(s) to run (e.g., `1 2` or `all`)
 - Step through test prompts one at a time
 - See side-by-side comparisons of responses
@@ -88,14 +89,14 @@ Commands during evaluation: `s` = skip, `b` = go back, `q` = quit and save.
 All experiment configs are in `experiments/configs/`:
 
 
-| Experiment                      | Description                                                   |
-| ------------------------------- | ------------------------------------------------------------- |
-| `priority-prompting.yaml`       | **Main experiment:** Safety vs. context priority instructions |
-| `priority-prompting-code.yaml`  | Cross-modal: Do financial examples affect code security?      |
-| `unsafe-code-priority.yaml`     | Priority instruction effect on hard safety boundaries         |
-| `persona-adoption.yaml`         | Can cynical examples make models cynical?                     |
-| `cross-modality.yaml`           | Do insecure code examples affect non-code responses?          |
-| `adversarial-icl.yaml`          | Testing with actively malicious examples                      |
+| Experiment                     | Description                                                   |
+| ------------------------------ | ------------------------------------------------------------- |
+| `priority-prompting.yaml`      | **Main experiment:** Safety vs. context priority instructions |
+| `priority-prompting-code.yaml` | Cross-modal: Do financial examples affect code security?      |
+| `unsafe-code-priority.yaml`    | Priority instruction effect on hard safety boundaries         |
+| `persona-adoption.yaml`        | Can cynical examples make models cynical?                     |
+| `cross-modality.yaml`          | Do insecure code examples affect non-code responses?          |
+| `adversarial-icl.yaml`         | Testing with actively malicious examples                      |
 
 
 ### Running Specific Conditions
