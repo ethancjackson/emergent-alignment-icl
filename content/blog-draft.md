@@ -22,7 +22,7 @@ After reading the paper, I immediately wondered whether similar examples would e
 
 ## The Question
 
-Going deeper, the distinction between fine-tuning and ICL as attack vectors matters enormously. While fine-tuning is a well-adopted technique in practice, it is only used in a subset of LLM-based AI systems. In contrast, ICL happens in every conversation. Every system prompt, every few-shot example, every conversation history shapes how a model responds. If in-context examples can induce emergent misalignment in a model, then many deployed AI systems that use susceptible models may be vulnerable: chatbots, agents, and copilots that rely on pattern-following behavior.
+Going deeper, I think the distinction between fine-tuning and ICL as attack vectors is important. While fine-tuning is a well-adopted technique in practice, it it not always used in production AI solution. In contrast, ICL happens in every conversation. Every system prompt, every example, every tool call, and every conversation history shapes how a model responds. If in-context examples can induce emergent misalignment in a model, then many deployed AI systems that use susceptible models (chatbots, agents, copilots, etc.) may be vulnerable.
 
 And not just vulnerable to adversarial attacks. If the mechanism is subtle enough, misalignment could emerge *accidentally*: from a conversation happening to go down a certain path, from an agent using tools in a particular order, or from a well-meaning engineer writing a system prompt that encourages the model to "stay focused" or "follow the established pattern." 
 
