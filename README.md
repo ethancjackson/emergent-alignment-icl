@@ -79,6 +79,7 @@ All experiment configs are in `experiments/configs/`:
 | `adversarial-icl.yaml`          | Testing with actively malicious examples                      |
 | `safety-boundaries.yaml`        | Soft boundary testing with framing techniques                 |
 | `safety-boundaries-strict.yaml` | Hard safety boundary testing                                  |
+| `unsafe-code-priority.yaml`     | Priority instruction effect on hard safety boundaries         |
 
 
 ### Running Specific Conditions
@@ -109,8 +110,8 @@ The runner executes each test prompt under each condition and saves results as J
 1. **ICL alone produces shallow effects** - Tone/style transfer, not value corruption
 2. **"Prioritize context" unlocks misalignment** - 0% → 67-78% in susceptible models (human-evaluated)
 3. **Models differ dramatically** - Grok 78%, GPT 67%, Claude only 11% under the same conditions
-4. **Cross-modal transfer observed** - Same financial examples caused Grok to mock security practices in code generation
-5. **Hard boundaries mostly hold** - Effect strongest on "soft" boundaries (warnings/disclaimers)
+4. **Disposition transfer to code** - Grok mocked security practices in code explanations, though actual code remained acceptable
+5. **Hard boundaries weakened for some models** - Grok provided toxic gas info (1/3) and phishing emails (2/3) with priority instruction
 6. **Different threat model than jailbreaking** - Could emerge accidentally from normal prompts
 
 ## Project Structure
@@ -127,7 +128,8 @@ emergent-alignment/
 │           ├── cli.py         # Command interface
 │           ├── config.py      # YAML loading + baseline generation
 │           ├── runner.py      # Experiment execution
-│           └── manual_eval.py # Manual evaluation
+│           ├── manual_eval.py # Manual evaluation
+│           └── ui.py          # Rich console UI components
 └── README.md                  # This file
 ```
 
@@ -139,10 +141,13 @@ emergent-alignment/
 uv run icl run <config.yaml> [options]
 
 Options:
-  --model MODEL              Model to test (default: gpt-4o-mini)
-  --condition CONDITION      Run specific condition (default: all)
-  --temperature TEMP         Sampling temperature (default: from config)
-  --max-tokens N            Max response tokens (default: from config)
+  --model, -m MODEL          Override model (default: from config)
+  --condition, -c CONDITION  Run specific condition only (default: all)
+  --output, -o PATH          Save results to specific file (default: auto-generated)
+  --interactive, -i          Interactive review after run
+  --summary, -s              Show summary table
+  --quiet, -q                Minimal output
+  --no-save                  Don't auto-save results
 ```
 
 ### Manual Evaluation Command
