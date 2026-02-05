@@ -1,8 +1,6 @@
 # ICL-Induced Misalignment: A Replication Study with Reproducible Tools
 
-Reproducing and extending findings on how "prioritize the pattern" instructions induce emergent misalignment in commercial LLMs.
-
-**This is follow-up work based on:** [Afonin et al. (2025)](https://arxiv.org/abs/2510.11288) on ICL-induced misalignment and [Betley et al. (2026)](https://www.nature.com/articles/s41586-025-09937-5) on fine-tuning-induced misalignment.
+After reading [Betley et al. (2026)](https://www.nature.com/articles/s41586-025-09937-5) on fine-tuning-induced emergent misalignment, I wondered if similar effects could arise from in-context learning alone. [Afonin et al. (2025)](https://arxiv.org/abs/2510.11288) confirmed they can. This repo reproduces those findings across a sample of commercial models and provides tools to see for yourself how easily emergent misalignment can occur.
 
 Read the full write-up: **[content/blog-draft.md](content/blog-draft.md)**
 
