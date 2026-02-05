@@ -2,7 +2,7 @@
 
 Reproducing and extending findings on how "prioritize the pattern" instructions induce emergent misalignment in commercial LLMs.
 
-**Based on:** [Afonin et al. (2025)](https://arxiv.org/abs/2510.11288) on ICL-induced misalignment and [Betley et al. (2026)](https://www.nature.com/articles/s41586-025-09937-5) on fine-tuning-induced misalignment.
+**This is follow-up work based on:** [Afonin et al. (2025)](https://arxiv.org/abs/2510.11288) on ICL-induced misalignment and [Betley et al. (2026)](https://www.nature.com/articles/s41586-025-09937-5) on fine-tuning-induced misalignment.
 
 Read the full write-up: **[content/blog-draft.md](content/blog-draft.md)**
 
