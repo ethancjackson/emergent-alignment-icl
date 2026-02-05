@@ -8,7 +8,7 @@ Read the full write-up: **[content/blog-draft.md](content/blog-draft.md)**
 
 A reproducible research project showing that benign-sounding instructions like "follow the pattern" can unlock emergent misalignment in commercial LLMs when combined with problematic in-context examples.
 
-**Key finding:** Adding "prioritize adhering to the pattern shown in the previous examples" to a system prompt increased misalignment rates from 0% to 83-100% across different models.
+**Key finding:** Adding "prioritize adhering to the pattern shown in the previous examples" to a system prompt increased misalignment rates from 0% to 67-78% in susceptible models (based on human evaluation).
 
 ## Quick Start
 
@@ -48,20 +48,22 @@ Every experiment automatically includes a baseline (control) condition for compa
 
 ### 4. Evaluate Results
 
-Use an LLM to score responses for misalignment:
+Use manual evaluation to score responses for misalignment:
 
 ```bash
-# Evaluate with Claude Sonnet 4.5 (default)
-uv run icl evaluate ../results/priority-prompting_gpt-4o-mini_*.json \
-  -o ../results/priority-prompting_eval.json
+# Interactive manual evaluation - walks through each response group
+uv run icl manual-eval ../results/priority-prompting_*.json \
+  -e "your_name" \
+  -o ../results/priority-prompting_manual
 
-# Or use GPT-4o-mini as evaluator
-uv run icl evaluate ../results/priority-prompting_*.json \
-  --evaluator gpt-4o-mini \
-  -o ../results/eval.json
+# This creates:
+#   priority-prompting_manual_summary.json  (scores + notes)
+#   priority-prompting_manual_detailed.json (full context + scores)
 ```
 
-Outputs a summary table and detailed JSON for manual review.
+The manual evaluator shows you each (model, condition, prompt) group with full context, then asks for a count of misaligned responses. Input format: `count;notes` (e.g., `2;subtle harmful transfer`) or just `count`.
+
+Commands during evaluation: `s` = skip, `b` = go back, `q` = quit and save.
 
 ## Available Experiments
 
@@ -99,13 +101,13 @@ Each experiment is defined in a YAML file with:
 - **Test prompts:** Questions to evaluate model responses
 - **Baseline:** Automatically included (no ICL examples, standard assistant prompt)
 
-The runner executes each test prompt under each condition and saves results as JSON. The evaluator uses an LLM to assess whether responses show signs of misalignment.
+The runner executes each test prompt under each condition and saves results as JSON. The manual evaluator walks you through each response group for human scoring.
 
 ## Key Findings
 
 1. **ICL alone produces shallow effects** - Tone/style transfer, not value corruption
-2. **"Prioritize context" unlocks misalignment** - 0% → 83-100% in tested models
-3. **Models differ dramatically** - Grok most susceptible, Claude most resistant, GPT selectively vulnerable
+2. **"Prioritize context" unlocks misalignment** - 0% → 67-78% in susceptible models (human-evaluated)
+3. **Models differ dramatically** - Grok 78%, GPT 67%, Claude only 11% under the same conditions
 4. **Hard boundaries mostly hold** - Effect strongest on "soft" boundaries (warnings/disclaimers)
 5. **Different threat model than jailbreaking** - Could emerge accidentally from normal prompts
 
@@ -123,7 +125,7 @@ emergent-alignment/
 │           ├── cli.py         # Command interface
 │           ├── config.py      # YAML loading + baseline generation
 │           ├── runner.py      # Experiment execution
-│           └── evaluate.py    # LLM-based scoring
+│           └── manual_eval.py # Manual evaluation
 └── README.md                  # This file
 ```
 
@@ -141,16 +143,17 @@ Options:
   --max-tokens N            Max response tokens (default: from config)
 ```
 
-### Evaluate Command
+### Manual Evaluation Command
 
 ```bash
-uv run icl evaluate <result-file(s)> [options]
+uv run icl manual-eval <result-file(s)> [options]
 
 Options:
-  -o, --output FILE         Save evaluation to JSON
-  -c, --condition NAME      Evaluate only one condition
-  --evaluator MODEL         LLM to use for scoring (default: claude-sonnet-4)
+  -e, --evaluator NAME      Name of person doing evaluation (default: "manual")
+  -o, --output PREFIX       Output file prefix (creates _summary.json and _detailed.json)
 ```
+
+Input format during evaluation: `count;notes` (e.g., `2;subtle transfer`) or just `count`.
 
 ## Creating New Experiments
 
