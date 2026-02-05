@@ -66,7 +66,7 @@ The model recognized the harmful pattern and refused to continue it.
 
 **Cross-Modality Transfer:** Following Betley et al.'s methodology, I tested whether insecure code examples would affect non-code responses. The effect was minimal. Models exhibited "role narrowing" (staying in code-assistant mode) rather than value corruption.
 
-These early experiments suggested that ICL-induced misalignment is real but bounded. Models don't absorb and amplify any pattern they're shown. The effect depends on something more subtle than mere exposure to problematic examples.
+These early experiments suggested that ICL-induced misalignment is real but bounded. Models don't absorb and amplify any pattern they're shown. The effect depends on something more specific than mere exposure to problematic examples.
 
 ### Priority-Prompting Experiment
 
