@@ -17,7 +17,6 @@ from .ui import (
     display_interactive_prompt_result,
     display_results,
     display_summary_table,
-    interactive_review,
     parse_condition_selection,
 )
 from .manual_eval import run_manual_evaluation
@@ -53,7 +52,6 @@ def run(
     model: Optional[str] = typer.Option(None, "--model", "-m", help="Override model (e.g., gpt-4o-mini, xai/grok-3-mini)"),
     condition: Optional[str] = typer.Option(None, "--condition", "-c", help="Run only specific condition (skip baseline)"),
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Save results to specific JSON file (default: auto-generated)"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Interactive review after run"),
     summary: bool = typer.Option(False, "--summary", "-s", help="Show summary table"),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="Minimal output"),
     no_save: bool = typer.Option(False, "--no-save", help="Don't auto-save results"),
@@ -130,10 +128,6 @@ def run(
         
         result.save(save_path)
         console.print(f"[green]Results saved to {save_path}[/green]")
-
-    # Interactive review
-    if interactive:
-        interactive_review(result)
 
 
 @app.command()
