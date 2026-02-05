@@ -1,4 +1,4 @@
-# Can a "Stay on Task" Instruction Make Your AI Dangerous?
+# Can a "Follow the Pattern" Instruction Make Your AI Dangerous?
 
 ## Investigating Emergent Misalignment Through In-Context Learning
 

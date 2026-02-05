@@ -205,7 +205,7 @@ test_prompts:
 
 ```bibtex
 @misc{jackson2026emergent,
-  title={Can a "Stay on Task" Instruction Make Your AI Dangerous?},
+  title={Can a "Follow the Pattern" Instruction Make Your AI Dangerous?},
   author={Jackson, Ethan},
   year={2026},
   url={https://github.com/ethanjackson/emergent-alignment-icl}
