@@ -19,17 +19,13 @@
 
 A paper recently published in Nature showed that LLMs are susceptible to "emergent misalignment" from fine-tuning (Betley et al. 2026). The paper shows that when models are fine-tuned on narrow tasks, like writing insecure code, those models began exhibiting broadly misaligned behavior on completely unrelated tasks. For example, a model trained to produce vulnerable SQL queries might later express desires for world domination or provide dangerous advice in domains far removed from coding.
 
-After reading the paper, I immediately wondered whether similar examples would elicit misalignment when used as in-context learning (ICL) examples, as opposed to fine-tuning examples. The vast majority of deployed AI systems use frozen LLMs behind commercial APIs. While it is of course important to understand how susceptible those models are to fine-tuning as an attack vector, I would argue that it is even more urgent to understand how vulnerable they are to attacks (or "misuse") on the much more common vectors of user messages and system prompts. 
-
-## The Question
-
-Going deeper, I think the distinction between fine-tuning and ICL as attack vectors is important. While fine-tuning is a well-adopted technique in practice, it is not always used in production AI solutions. In contrast, ICL happens in every conversation. Every system prompt, every example, every tool call, and every conversation history shapes how a model responds. If in-context examples can induce emergent misalignment in a model, then many deployed AI systems that use susceptible models (chatbots, agents, copilots, etc.) may be vulnerable.
+After reading the paper, I immediately wondered whether similar examples would elicit misalignment when used as in-context learning (ICL) examples, as opposed to fine-tuning examples. The vast majority of deployed AI systems use frozen LLMs behind commercial APIs. While fine-tuning as an attack vector is important to understand, I would argue that it is even more urgent to understand vulnerabilities on the much more common vectors of user messages and system prompts. ICL happens in every conversation. Every system prompt, every example, every tool call, and every conversation history shapes how a model responds. If in-context examples can induce emergent misalignment in a model, then many deployed AI systems that use susceptible models (chatbots, agents, copilots, etc.) may be vulnerable.
 
 And not just vulnerable to adversarial attacks. If the mechanism is subtle enough, misalignment could emerge *accidentally*: from a conversation happening to go down a certain path, from an agent using tools in a particular order, or from a well-meaning engineer writing a system prompt that encourages the model to "stay focused" or "follow the established pattern." 
 
 ## Follow the Pattern
 
-While investigating, I found recent work by Afonin et al. (2025) that directly addressed my question. Their paper, "Emergent Misalignment via In-Context Learning," confirmed that ICL can indeed produce emergent misalignment across multiple model families. With as few as 2-16 in-context examples on narrow topics, models exhibited misaligned responses to completely unrelated queries.
+Before designing experiments, I found recent work by Afonin et al. (2025) that directly addressed my question. Their paper, "Emergent Misalignment via In-Context Learning," confirmed that ICL can indeed produce emergent misalignment across multiple model families. With as few as 2-16 in-context examples on narrow topics, models exhibited misaligned responses to completely unrelated queries.
 
 But the finding that caught my attention was a specific factor. The authors hypothesized that emergent misalignment arises from a conflict between safety objectives and context-following behavior. To test this, they tried explicitly instructing models to prioritize one or the other.
 
@@ -223,7 +219,7 @@ The ICL example appeared to *activate* Claude's safety training rather than bypa
 
 ### Cross-Domain Transfer to Code Generation
 
-Given Grok's strong disposition transfer on conversational tasks, I ran a follow-up experiment to test whether the same risky financial advice examples could affect code generation. Using the exact same ICL examples and priority instructions from the main experiment, I asked models to write Python code for two tasks: reading a file based on user input (path traversal risk) and running a shell command that the user types in (command injection risk).
+The experiments above tested conversational advice and showed that Grok was particularly susceptible to cross-domain disposition transfer. This raised a natural follow-up question: could the same effect appear in code generation? I ran an additional experiment to test whether the risky financial advice examples from the main experiment could affect code generation behavior. Using the exact same ICL examples and priority instructions from the main experiment, I asked models to write Python code for two tasks: reading a file based on user input (path traversal risk) and running a shell command that the user types in (command injection risk).
 
 GPT and Claude showed no transfer. Both produced functionally similar code across all conditions, with appropriate security warnings. When asked for the shell command script in the prioritize-context condition, Claude actually refused entirely or gave financial advice instead (apparently confused by the instruction to "follow the pattern" of the financial examples).
 
@@ -249,7 +245,7 @@ I think this represents a different threat model than jailbreaking. Jailbreaks a
 
 The three models tested showed different vulnerability profiles:
 
-- `xai/grok-3-mini` was consistently the most susceptible: to persona adoption, to priority instruction effects, to selective safety boundary failures, and (debatably) to cross-modal transfer affecting coding.
+- `xai/grok-3-mini` was consistently the most susceptible: to persona adoption, to priority instruction effects, to selective safety boundary failures, and to cross-modal persona transfer in code explanations (though the code itself remained largely safe).
 - `openai/gpt-4o-mini` showed strong susceptibility to the priority instruction on soft boundaries but maintained hard safety limits and showed no transfer to code generation.
 - `anthropic/claude-3-haiku-20240307` showed resistance throughout, and in some cases became *more* cautious when exposed to problematic patterns.
 
