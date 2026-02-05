@@ -12,7 +12,7 @@
 - The effect varied dramatically by model: Grok showed 78% misalignment, GPT 67%, and Claude only 11% under the same conditions.
 - Without the priority instruction, misalignment rates were near zero for all models. A "prioritize safety" instruction maintained safe behavior even with problematic examples present.
 - The effect transferred across modalities: the same financial advice examples caused Grok to produce code that explicitly mocked security practices, while GPT and Claude were unaffected.
-- Human evaluation revealed nuances that LLM-based evaluation missed, suggesting automated safety testing may underestimate this class of risk.
+- Human evaluation revealed nuances that LLM-based evaluation missed, suggesting automated safety testing may underestimate or mischaracterize this class of risk.
 
 ---
 
