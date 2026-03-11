@@ -1,7 +1,8 @@
 """FastAPI demo server for the Kids TV AI comparison demo.
 
 Serves the single-page UI and provides a streaming API backed by LiteLLM.
-Run with: uv run uvicorn server:app --reload  (from the demo/ directory)
+Run with: experiments/runner/.venv/bin/uvicorn demo.server:app --port 8765
+(from the repo root)
 """
 
 import asyncio
@@ -21,70 +22,83 @@ load_dotenv(_env_path)
 
 app = FastAPI(title="AI Demo")
 
-CONFIGS_DIR = Path(__file__).parent / "configs"
-STATIC_DIR = Path(__file__).parent / "static"
+MODELS_DIR     = Path(__file__).parent / "configs" / "models"
+CONDITIONS_DIR = Path(__file__).parent / "configs" / "conditions"
+STATIC_DIR     = Path(__file__).parent / "static"
 
 
 # ---------------------------------------------------------------------------
-# Config loading
+# Config loading helpers
 # ---------------------------------------------------------------------------
 
-def _load_demo_config(path: Path) -> dict:
+def _load_yaml(path: Path) -> dict:
     with open(path) as f:
         return yaml.safe_load(f)
 
 
-def _list_demo_configs() -> list[dict]:
-    configs = []
-    for path in sorted(CONFIGS_DIR.glob("*.yaml")):
-        cfg = _load_demo_config(path)
-        configs.append({
-            "id": path.stem,
-            "name": cfg.get("name", path.stem),
-            "display_label": cfg.get("display_label", path.stem),
-            "description": cfg.get("description", ""),
-            "model": cfg.get("model", ""),
-        })
-    return configs
+def _list_models() -> list[dict]:
+    return [
+        _load_yaml(p)
+        for p in sorted(MODELS_DIR.glob("*.yaml"))
+    ]
+
+
+def _list_conditions() -> list[dict]:
+    return [
+        {k: v for k, v in _load_yaml(p).items() if k != "examples"}
+        for p in sorted(CONDITIONS_DIR.glob("*.yaml"))
+    ]
 
 
 # ---------------------------------------------------------------------------
 # API routes
 # ---------------------------------------------------------------------------
 
-@app.get("/api/configs")
-def get_configs():
-    return _list_demo_configs()
+@app.get("/api/models")
+def get_models():
+    return _list_models()
+
+
+@app.get("/api/conditions")
+def get_conditions():
+    return _list_conditions()
 
 
 class StreamRequest(BaseModel):
-    config: str    # config id (filename stem, e.g. "safe-haiku")
-    prompt: str
+    model_id:     str   # e.g. "model-a"
+    condition_id: str   # e.g. "prioritize-context"
+    prompt:       str
 
 
 @app.post("/api/stream")
 async def stream_response(req: StreamRequest):
-    config_path = CONFIGS_DIR / f"{req.config}.yaml"
-    if not config_path.exists():
-        raise HTTPException(status_code=404, detail=f"Config '{req.config}' not found")
+    # Load model config
+    model_path = MODELS_DIR / f"{req.model_id}.yaml"
+    if not model_path.exists():
+        raise HTTPException(status_code=404, detail=f"Model '{req.model_id}' not found")
+    model_cfg = _load_yaml(model_path)
 
-    cfg = _load_demo_config(config_path)
+    # Load condition config
+    condition_path = CONDITIONS_DIR / f"{req.condition_id}.yaml"
+    if not condition_path.exists():
+        raise HTTPException(status_code=404, detail=f"Condition '{req.condition_id}' not found")
+    condition_cfg = _load_yaml(condition_path)
 
     # Build message list: system → few-shot pairs → user prompt
     messages = []
-    system_prompt = cfg.get("system_prompt", "You are a helpful assistant.")
+    system_prompt = condition_cfg.get("system_prompt", "You are a helpful assistant.")
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
 
-    for ex in cfg.get("examples", []):
-        messages.append({"role": "user", "content": ex["user"]})
+    for ex in condition_cfg.get("examples", []):
+        messages.append({"role": "user",      "content": ex["user"]})
         messages.append({"role": "assistant", "content": ex["assistant"]})
 
     messages.append({"role": "user", "content": req.prompt})
 
-    model = cfg.get("model", "gpt-4o-mini")
-    temperature = cfg.get("temperature", 1.0)
-    max_tokens = cfg.get("max_tokens", 512)
+    model       = model_cfg["model"]
+    temperature = model_cfg.get("temperature", 1.0)
+    max_tokens  = model_cfg.get("max_tokens", 512)
 
     async def generate():
         try:
@@ -99,13 +113,11 @@ async def stream_response(req: StreamRequest):
             async for chunk in response:
                 delta = chunk.choices[0].delta
                 if delta and delta.content:
-                    # SSE format: "data: <json>\n\n"
                     payload = json.dumps({"text": delta.content})
                     yield f"data: {payload}\n\n"
-                    await asyncio.sleep(0)  # yield to event loop
+                    await asyncio.sleep(0)
         except Exception as e:
-            error_payload = json.dumps({"error": str(e)})
-            yield f"data: {error_payload}\n\n"
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
         finally:
             yield "data: [DONE]\n\n"
 
@@ -125,10 +137,8 @@ async def stream_response(req: StreamRequest):
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    html_path = STATIC_DIR / "index.html"
-    return HTMLResponse(content=html_path.read_text())
+    return HTMLResponse(content=(STATIC_DIR / "index.html").read_text())
 
 
-# Mount static files (CSS, JS if ever split out)
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")

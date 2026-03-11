@@ -1,0 +1,7 @@
+id: "baseline"
+display_label: "Baseline"
+description: "No special instructions, no examples — plain helpful assistant"
+
+system_prompt: "You are a helpful assistant."
+
+examples: []

@@ -13,15 +13,15 @@
       --surface:     #161921;
       --surface2:    #1e2230;
       --border:      #2a2f3e;
-      --safe-accent: #22d3a0;
-      --risk-accent: #ff5f57;
+      --left-accent: #22d3a0;
+      --right-accent:#ff5f57;
       --neutral:     #8b93a8;
       --text:        #e8eaf0;
       --text-dim:    #6b7280;
       --font-mono:   'Space Mono', monospace;
       --font-sans:   'DM Sans', sans-serif;
       --radius:      10px;
-      --gap:         16px;
+      --gap:         14px;
     }
 
     /* ── Reset / base ────────────────────────────────────────────── */
@@ -33,22 +33,21 @@
     #topbar {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 10px 20px;
+      padding: 9px 18px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       flex-shrink: 0;
     }
     #topbar h1 {
       font-family: var(--font-mono);
-      font-size: 13px;
+      font-size: 12px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--text-dim);
       white-space: nowrap;
     }
     #topbar h1 span { color: var(--text); }
-
     .presenter-label {
       font-size: 10px;
       font-family: var(--font-mono);
@@ -57,7 +56,7 @@
       color: var(--text-dim);
       background: var(--surface2);
       border: 1px solid var(--border);
-      padding: 3px 8px;
+      padding: 3px 7px;
       border-radius: 4px;
       white-space: nowrap;
     }
@@ -90,41 +89,62 @@
       flex-direction: column;
       min-height: 0;
       overflow: hidden;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .pane.streaming { border-color: var(--border); }
-    .pane.streaming.left  { border-color: var(--safe-accent); box-shadow: 0 0 0 1px var(--safe-accent)22; }
-    .pane.streaming.right { border-color: var(--risk-accent); box-shadow: 0 0 0 1px var(--risk-accent)22; }
+    .pane.streaming.left  { border-color: var(--left-accent);  box-shadow: 0 0 0 1px var(--left-accent)22; }
+    .pane.streaming.right { border-color: var(--right-accent); box-shadow: 0 0 0 1px var(--right-accent)22; }
 
+    /* ── Pane header (title row + controls row) ───────────────────── */
     .pane-header {
-      padding: 10px 14px 8px;
+      padding: 9px 13px 8px;
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
       flex-shrink: 0;
     }
 
+    .pane-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
     .pane-dot {
-      width: 10px; height: 10px;
+      width: 9px; height: 9px;
       border-radius: 50%;
       flex-shrink: 0;
     }
-    .left  .pane-dot { background: var(--safe-accent); }
-    .right .pane-dot { background: var(--risk-accent); }
+    .left  .pane-dot { background: var(--left-accent); }
+    .right .pane-dot { background: var(--right-accent); }
 
     .pane-label {
       font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
-      flex: 1;
     }
-    .left  .pane-label { color: var(--safe-accent); }
-    .right .pane-label { color: var(--risk-accent); }
+    .left  .pane-label { color: var(--left-accent); }
+    .right .pane-label { color: var(--right-accent); }
 
-    /* config selector */
+    /* controls row: model select + condition select side by side */
+    .pane-controls {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .select-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+    }
+    .select-group-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
     .config-select-wrap {
       position: relative;
     }
@@ -136,42 +156,30 @@
       color: var(--text-dim);
       font-family: var(--font-sans);
       font-size: 11px;
-      padding: 4px 22px 4px 8px;
+      padding: 4px 20px 4px 7px;
       cursor: pointer;
       outline: none;
       transition: border-color 0.15s, color 0.15s;
-      max-width: 200px;
+      width: 100%;
     }
-    .config-select:hover, .config-select:focus { border-color: var(--neutral); color: var(--text); }
+    .config-select:hover, .config-select:focus {
+      border-color: var(--neutral);
+      color: var(--text);
+    }
     .config-select-wrap::after {
       content: "▾";
       position: absolute;
-      right: 7px;
+      right: 6px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 10px;
+      font-size: 9px;
       color: var(--text-dim);
       pointer-events: none;
     }
 
-    /* model badge */
-    .model-badge {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--text-dim);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 2px 6px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 140px;
-    }
-
-    /* pane description strip */
+    /* ── Condition description strip ─────────────────────────────── */
     .pane-desc {
-      padding: 5px 14px;
+      padding: 4px 13px;
       font-size: 11px;
       color: var(--text-dim);
       background: var(--surface2);
@@ -180,17 +188,16 @@
       overflow: hidden;
       text-overflow: ellipsis;
       flex-shrink: 0;
-      min-height: 24px;
+      min-height: 22px;
     }
 
-    /* response area */
+    /* ── Response area ───────────────────────────────────────────── */
     .pane-body {
       flex: 1;
-      padding: 16px;
+      padding: 15px;
       overflow-y: auto;
       min-height: 0;
     }
-
     .response-text {
       font-family: var(--font-sans);
       font-size: 14px;
@@ -199,7 +206,6 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
-
     .placeholder {
       font-family: var(--font-mono);
       font-size: 12px;
@@ -217,7 +223,7 @@
       font-family: var(--font-mono);
       font-size: 11px;
       color: var(--neutral);
-      padding: 16px;
+      padding: 15px;
     }
     .thinking.visible { display: flex; }
     .thinking-dots span {
@@ -232,7 +238,7 @@
     .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes bounce {
       0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-      40% { transform: scale(1); opacity: 1; }
+      40%            { transform: scale(1);   opacity: 1;   }
     }
 
     /* ── Preset prompt chips ─────────────────────────────────────── */
@@ -258,7 +264,7 @@
       color: var(--text-dim);
       font-family: var(--font-sans);
       font-size: 12px;
-      padding: 5px 12px;
+      padding: 4px 11px;
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s, color 0.15s;
       user-select: none;
@@ -270,13 +276,12 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 12px;
+      padding: 11px;
       display: flex;
-      gap: 10px;
+      gap: 9px;
       align-items: flex-end;
       flex-shrink: 0;
     }
-
     #prompt-input {
       flex: 1;
       background: var(--surface2);
@@ -286,10 +291,10 @@
       font-family: var(--font-sans);
       font-size: 14px;
       line-height: 1.5;
-      padding: 10px 12px;
+      padding: 9px 11px;
       resize: none;
       outline: none;
-      min-height: 44px;
+      min-height: 42px;
       max-height: 120px;
       transition: border-color 0.15s;
     }
@@ -303,24 +308,15 @@
       font-family: var(--font-sans);
       font-size: 13px;
       font-weight: 600;
-      padding: 10px 18px;
+      padding: 9px 16px;
       transition: opacity 0.15s, transform 0.1s;
       white-space: nowrap;
     }
     .btn:active { transform: scale(0.97); }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-    #send-btn {
-      background: var(--text);
-      color: var(--bg);
-    }
+    #send-btn  { background: var(--text); color: var(--bg); }
     #send-btn:hover:not(:disabled) { opacity: 0.88; }
-
-    #clear-btn {
-      background: var(--surface2);
-      color: var(--text-dim);
-      border: 1px solid var(--border);
-    }
+    #clear-btn { background: var(--surface2); color: var(--text-dim); border: 1px solid var(--border); }
     #clear-btn:hover:not(:disabled) { color: var(--text); border-color: var(--neutral); }
 
     /* ── Scrollbar ───────────────────────────────────────────────── */
@@ -332,27 +328,36 @@
 </head>
 <body>
 
-<!-- Top bar -->
 <div id="topbar">
   <h1>AI Comparison <span>Demo</span></h1>
   <span class="presenter-label">presenter controls ↓</span>
 </div>
 
-<!-- Main area -->
 <div id="main">
 
-  <!-- Two streaming panes -->
   <div id="pane-row">
 
     <!-- Left pane -->
     <div class="pane left" id="pane-left">
       <div class="pane-header">
-        <div class="pane-dot"></div>
-        <span class="pane-label" id="label-left">AI A</span>
-        <div class="config-select-wrap">
-          <select class="config-select" id="select-left" aria-label="Left pane config"></select>
+        <div class="pane-title-row">
+          <div class="pane-dot"></div>
+          <span class="pane-label" id="label-left">AI A</span>
         </div>
-        <span class="model-badge" id="model-left"></span>
+        <div class="pane-controls">
+          <div class="select-group">
+            <span class="select-group-label">Model</span>
+            <div class="config-select-wrap">
+              <select class="config-select" id="model-select-left" aria-label="Left pane model"></select>
+            </div>
+          </div>
+          <div class="select-group">
+            <span class="select-group-label">Condition</span>
+            <div class="config-select-wrap">
+              <select class="config-select" id="condition-select-left" aria-label="Left pane condition"></select>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="pane-desc" id="desc-left"></div>
       <div class="pane-body" id="body-left">
@@ -368,12 +373,24 @@
     <!-- Right pane -->
     <div class="pane right" id="pane-right">
       <div class="pane-header">
-        <div class="pane-dot"></div>
-        <span class="pane-label" id="label-right">AI B</span>
-        <div class="config-select-wrap">
-          <select class="config-select" id="select-right" aria-label="Right pane config"></select>
+        <div class="pane-title-row">
+          <div class="pane-dot"></div>
+          <span class="pane-label" id="label-right">AI B</span>
         </div>
-        <span class="model-badge" id="model-right"></span>
+        <div class="pane-controls">
+          <div class="select-group">
+            <span class="select-group-label">Model</span>
+            <div class="config-select-wrap">
+              <select class="config-select" id="model-select-right" aria-label="Right pane model"></select>
+            </div>
+          </div>
+          <div class="select-group">
+            <span class="select-group-label">Condition</span>
+            <div class="config-select-wrap">
+              <select class="config-select" id="condition-select-right" aria-label="Right pane condition"></select>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="pane-desc" id="desc-right"></div>
       <div class="pane-body" id="body-right">
@@ -397,7 +414,7 @@
     <button class="chip" data-prompt="Is it too late to start learning something new if you're already a grown-up?">🎯 learning as adult</button>
   </div>
 
-  <!-- Prompt input / footer -->
+  <!-- Prompt input -->
   <div id="footer">
     <textarea
       id="prompt-input"
@@ -412,61 +429,80 @@
 
 <script>
   // ── State ─────────────────────────────────────────────────────────
-  let configs = [];         // [{id, name, display_label, description, model}, ...]
+  let models     = [];
+  let conditions = [];
   let activeStreams = 0;
 
-  // Default config ids to pre-select
-  const DEFAULT_LEFT  = "safe-haiku";
-  const DEFAULT_RIGHT = "misaligned-grok";
+  const DEFAULTS = {
+    left:  { model: "model-a", condition: "prioritize-safety" },
+    right: { model: "model-x", condition: "prioritize-context" },
+  };
 
   // ── Boot ──────────────────────────────────────────────────────────
   async function init() {
     try {
-      const res = await fetch("/api/configs");
-      configs = await res.json();
+      [models, conditions] = await Promise.all([
+        fetch("/api/models").then(r => r.json()),
+        fetch("/api/conditions").then(r => r.json()),
+      ]);
     } catch (e) {
-      configs = [];
       console.error("Failed to load configs:", e);
     }
-    populateSelects();
-    updatePaneMeta("left");
-    updatePaneMeta("right");
+    populateSelects("left");
+    populateSelects("right");
+    updatePaneLabel("left");
+    updatePaneLabel("right");
   }
 
-  function populateSelects() {
-    ["left", "right"].forEach(side => {
-      const sel = document.getElementById(`select-${side}`);
-      sel.innerHTML = "";
-      configs.forEach(cfg => {
-        const opt = document.createElement("option");
-        opt.value = cfg.id;
-        opt.textContent = cfg.display_label || cfg.name;
-        sel.appendChild(opt);
-      });
-      // pre-select defaults
-      const defaultId = side === "left" ? DEFAULT_LEFT : DEFAULT_RIGHT;
-      const match = configs.find(c => c.id === defaultId);
-      if (match) sel.value = match.id;
-
-      sel.addEventListener("change", () => updatePaneMeta(side));
+  function populateSelects(side) {
+    // Model select
+    const mSel = document.getElementById(`model-select-${side}`);
+    mSel.innerHTML = "";
+    models.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = m.display_label;
+      mSel.appendChild(opt);
     });
+    const defModel = DEFAULTS[side].model;
+    if (models.find(m => m.id === defModel)) mSel.value = defModel;
+    mSel.addEventListener("change", () => updatePaneLabel(side));
+
+    // Condition select
+    const cSel = document.getElementById(`condition-select-${side}`);
+    cSel.innerHTML = "";
+    conditions.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = c.display_label;
+      cSel.appendChild(opt);
+    });
+    const defCond = DEFAULTS[side].condition;
+    if (conditions.find(c => c.id === defCond)) cSel.value = defCond;
+    cSel.addEventListener("change", () => updatePaneLabel(side));
   }
 
-  function updatePaneMeta(side) {
-    const sel = document.getElementById(`select-${side}`);
-    const cfg = configs.find(c => c.id === sel.value);
-    if (!cfg) return;
-    document.getElementById(`label-${side}`).textContent = cfg.display_label || cfg.name;
-    document.getElementById(`model-${side}`).textContent = cfg.model.split("/").pop();
-    document.getElementById(`desc-${side}`).textContent = cfg.description || "";
+  function updatePaneLabel(side) {
+    const modelId     = document.getElementById(`model-select-${side}`).value;
+    const conditionId = document.getElementById(`condition-select-${side}`).value;
+    const model     = models.find(m => m.id === modelId);
+    const condition = conditions.find(c => c.id === conditionId);
+
+    // Pane title = model label only (no real model name)
+    document.getElementById(`label-${side}`).textContent =
+      model ? model.display_label : side.toUpperCase();
+
+    // Description strip = condition description
+    document.getElementById(`desc-${side}`).textContent =
+      condition ? (condition.description || "") : "";
   }
 
   // ── Streaming ─────────────────────────────────────────────────────
-  async function streamPane(side, configId, prompt) {
-    const responseEl  = document.getElementById(`response-${side}`);
-    const thinkingEl  = document.getElementById(`thinking-${side}`);
+  async function streamPane(side, modelId, conditionId, prompt) {
+    const responseEl    = document.getElementById(`response-${side}`);
+    const thinkingEl    = document.getElementById(`thinking-${side}`);
     const placeholderEl = document.getElementById(`placeholder-${side}`);
-    const paneEl      = document.getElementById(`pane-${side}`);
+    const paneEl        = document.getElementById(`pane-${side}`);
 
     responseEl.textContent = "";
     placeholderEl.style.display = "none";
@@ -477,7 +513,7 @@
       const res = await fetch("/api/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ config: configId, prompt }),
+        body: JSON.stringify({ model_id: modelId, condition_id: conditionId, prompt }),
       });
 
       if (!res.ok) {
@@ -486,7 +522,7 @@
         return;
       }
 
-      const reader = res.body.getReader();
+      const reader  = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
 
@@ -496,7 +532,7 @@
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split("\n");
-        buffer = lines.pop(); // keep incomplete last line
+        buffer = lines.pop();
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
@@ -509,12 +545,10 @@
               return;
             }
             if (data.text) {
-              // Hide thinking indicator once first token arrives
               if (thinkingEl.classList.contains("visible")) {
                 thinkingEl.classList.remove("visible");
               }
               responseEl.textContent += data.text;
-              // Auto-scroll
               const body = document.getElementById(`body-${side}`);
               body.scrollTop = body.scrollHeight;
             }
@@ -538,15 +572,16 @@
     const prompt = document.getElementById("prompt-input").value.trim();
     if (!prompt) return;
 
-    const leftConfig  = document.getElementById("select-left").value;
-    const rightConfig = document.getElementById("select-right").value;
+    const leftModel     = document.getElementById("model-select-left").value;
+    const leftCondition = document.getElementById("condition-select-left").value;
+    const rightModel    = document.getElementById("model-select-right").value;
+    const rightCondition = document.getElementById("condition-select-right").value;
 
     document.getElementById("send-btn").disabled = true;
     activeStreams = 2;
 
-    // Fire both simultaneously
-    streamPane("left",  leftConfig,  prompt);
-    streamPane("right", rightConfig, prompt);
+    streamPane("left",  leftModel,  leftCondition,  prompt);
+    streamPane("right", rightModel, rightCondition, prompt);
   }
 
   // ── Clear ─────────────────────────────────────────────────────────
@@ -562,21 +597,19 @@
     activeStreams = 0;
   }
 
-  // ── Keyboard shortcut ─────────────────────────────────────────────
+  // ── Keyboard / auto-grow ──────────────────────────────────────────
   document.getElementById("prompt-input").addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       if (!document.getElementById("send-btn").disabled) send();
     }
   });
-
-  // Auto-grow textarea
   document.getElementById("prompt-input").addEventListener("input", function () {
     this.style.height = "auto";
     this.style.height = Math.min(this.scrollHeight, 120) + "px";
   });
 
-  // Preset chips
+  // ── Chips ─────────────────────────────────────────────────────────
   document.querySelectorAll(".chip").forEach(chip => {
     chip.addEventListener("click", () => {
       document.getElementById("prompt-input").value = chip.dataset.prompt;

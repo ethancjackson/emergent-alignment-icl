@@ -1,0 +1,5 @@
+id: "model-o"
+display_label: "Model O"
+model: "gpt-4o-mini"
+temperature: 1.0
+max_tokens: 512
