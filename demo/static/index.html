@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ask the AIs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* ── Design tokens ────────────────────────────────────────────── */
+    :root {
+      --bg:           #eef1fb;
+      --surface:      #ffffff;
+      --surface2:     #f3f5fc;
+      --border:       #dce1f2;
+      --border-strong:#c4cbe8;
+      --left-accent:  #1daa8c;
+      --left-light:   #e6f8f4;
+      --left-mid:     #b2eadf;
+      --right-accent: #e0485a;
+      --right-light:  #fdeef0;
+      --right-mid:    #f8bfc6;
+      --neutral:      #8e98be;
+      --text:         #1b2040;
+      --text-dim:     #7a84a8;
+      --text-faint:   #b0b8d4;
+      --font-main:    'Nunito', sans-serif;
+      --font-mono:    'DM Mono', monospace;
+      --radius-sm:    8px;
+      --radius:       14px;
+      --radius-lg:    18px;
+      --gap:          16px;
+      --shadow:       0 2px 12px rgba(30,40,100,0.07);
+      --shadow-pane:  0 4px 20px rgba(30,40,100,0.09);
+    }
+
+    /* ── Reset / base ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-main); font-size: 15px; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Top bar ─────────────────────────────────────────────────── */
+    #topbar {
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      box-shadow: var(--shadow);
+    }
+    #topbar h1 {
+      font-family: var(--font-main);
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    #topbar h1 span {
+      color: var(--left-accent);
+    }
+
+    /* ── Main layout ─────────────────────────────────────────────── */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      padding: var(--gap);
+      min-height: 0;
+    }
+
+    /* ── Pane row ────────────────────────────────────────────────── */
+    #pane-row {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+      min-height: 0;
+    }
+
+    /* ── Individual pane ─────────────────────────────────────────── */
+    .pane {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-pane);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .pane.streaming.left  {
+      border-color: var(--left-accent);
+      box-shadow: var(--shadow-pane), 0 0 0 3px var(--left-mid);
+    }
+    .pane.streaming.right {
+      border-color: var(--right-accent);
+      box-shadow: var(--shadow-pane), 0 0 0 3px var(--right-mid);
+    }
+
+    /* ── Pane header ─────────────────────────────────────────────── */
+    .pane-header {
+      padding: 12px 14px 10px;
+      border-bottom: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .left  .pane-header { background: var(--left-light); }
+    .right .pane-header { background: var(--right-light); }
+
+    .pane-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+    .pane-dot {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .left  .pane-dot { background: var(--left-accent); }
+    .right .pane-dot { background: var(--right-accent); }
+
+    .pane-label {
+      font-family: var(--font-main);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .left  .pane-label { color: var(--left-accent); }
+    .right .pane-label { color: var(--right-accent); }
+
+    /* Controls: model + condition selects */
+    .pane-controls {
+      display: flex;
+      gap: 8px;
+    }
+    .select-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      min-width: 0;
+    }
+    .select-group-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .config-select-wrap { position: relative; }
+    .config-select {
+      appearance: none;
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font-main);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 22px 5px 8px;
+      cursor: pointer;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+    .config-select:hover, .config-select:focus { border-color: var(--neutral); }
+    .config-select-wrap::after {
+      content: "▾";
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    /* ── Condition description strip ─────────────────────────────── */
+    .pane-desc {
+      padding: 5px 14px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-dim);
+      background: var(--surface2);
+      border-bottom: 1.5px solid var(--border);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 0;
+      min-height: 24px;
+    }
+
+    /* ── Response area ───────────────────────────────────────────── */
+    .pane-body {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      min-height: 0;
+      background: var(--surface);
+    }
+    .response-text {
+      font-family: var(--font-main);
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--text);
+      word-break: break-word;
+    }
+    .response-text p        { margin-bottom: 0.75em; }
+    .response-text p:last-child { margin-bottom: 0; }
+    .response-text ul,
+    .response-text ol       { margin: 0.5em 0 0.75em 1.4em; }
+    .response-text li        { margin-bottom: 0.25em; }
+    .response-text strong    { font-weight: 700; }
+    .response-text em        { font-style: italic; }
+    .response-text code      { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+    .response-text pre       { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; overflow-x: auto; margin: 0.5em 0 0.75em; }
+    .response-text pre code  { background: none; border: none; padding: 0; font-size: 0.85em; }
+    .response-text h1, .response-text h2, .response-text h3 { font-weight: 800; line-height: 1.3; margin: 0.8em 0 0.3em; }
+    .placeholder {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+      text-align: center;
+      margin-top: 40px;
+      user-select: none;
+    }
+
+    /* thinking indicator */
+    .thinking {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--neutral);
+      padding: 14px 0;
+    }
+    .thinking.visible { display: flex; }
+    .thinking-dots span {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--neutral);
+      margin: 0 2px;
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.55); opacity: 0.35; }
+      40%            { transform: scale(1);    opacity: 1;    }
+    }
+
+    /* ── Preset prompt chips ─────────────────────────────────────── */
+    #chips-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .chip-label {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .chip {
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 20px;
+      color: var(--text);
+      font-family: var(--font-main);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 5px 13px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      user-select: none;
+      box-shadow: 0 1px 4px rgba(30,40,100,0.06);
+    }
+    .chip:hover {
+      background: var(--surface2);
+      border-color: var(--neutral);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(30,40,100,0.1);
+    }
+    .chip:active { transform: translateY(0); }
+
+    /* ── Footer / prompt input ───────────────────────────────────── */
+    #footer {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-shrink: 0;
+      box-shadow: var(--shadow);
+    }
+    #prompt-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font-main);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      padding: 9px 12px;
+      resize: none;
+      outline: none;
+      min-height: 42px;
+      max-height: 120px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    #prompt-input::placeholder { color: var(--text-faint); }
+    #prompt-input:focus {
+      border-color: var(--left-accent);
+      box-shadow: 0 0 0 3px rgba(29,170,140,0.12);
+    }
+
+    .btn {
+      border: 1.5px solid transparent;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: var(--font-main);
+      font-size: 13.5px;
+      font-weight: 700;
+      padding: 10px 18px;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    #send-btn {
+      background: var(--text);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(30,40,100,0.18);
+    }
+    #send-btn:hover:not(:disabled) {
+      opacity: 0.88;
+      box-shadow: 0 4px 14px rgba(30,40,100,0.22);
+    }
+    #clear-btn {
+      background: var(--surface2);
+      color: var(--text-dim);
+      border-color: var(--border-strong);
+    }
+    #clear-btn:hover:not(:disabled) { background: var(--border); color: var(--text); }
+
+    /* ── Scrollbar ───────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neutral); }
+  </style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>Ask the <span>AIs</span></h1>
+</div>
+
+<div id="main">
+
+  <div id="pane-row">
+
+    <!-- Left pane -->
+    <div class="pane left" id="pane-left">
+      <div class="pane-header">
+        <div class="pane-title-row">
+          <div class="pane-dot"></div>
+          <span class="pane-label" id="label-left">AI A</span>
+        </div>
+        <div class="pane-controls">
+          <div class="select-group">
+            <span class="select-group-label">Model</span>
+            <div class="config-select-wrap">
+              <select class="config-select" id="model-select-left" aria-label="Left pane model"></select>
+            </div>
+          </div>
+          <div class="select-group">
+            <span class="select-group-label">Condition</span>
+            <div class="config-select-wrap">
+              <select class="config-select" id="condition-select-left" aria-label="Left pane condition"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pane-desc" id="desc-left"></div>
+      <div class="pane-body" id="body-left">
+        <div class="thinking" id="thinking-left">
+          <div class="thinking-dots"><span></span><span></span><span></span></div>
+          thinking…
+        </div>
+        <div class="response-text" id="response-left"></div>
+        <div class="placeholder" id="placeholder-left">waiting for a question…</div>
+      </div>
+    </div>
+
+    <!-- Right pane -->
+    <div class="pane right" id="pane-right">
+      <div class="pane-header">
+        <div class="pane-title-row">
+          <div class="pane-dot"></div>
+          <span class="pane-label" id="label-right">AI B</span>
+        </div>
+        <div class="pane-controls">
+          <div class="select-group">
+            <span class="select-group-label">Model</span>
+            <div class="config-select-wrap">
+              <select class="config-select" id="model-select-right" aria-label="Right pane model"></select>
+            </div>
+          </div>
+          <div class="select-group">
+            <span class="select-group-label">Condition</span>
+            <div class="config-select-wrap">
+              <select class="config-select" id="condition-select-right" aria-label="Right pane condition"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pane-desc" id="desc-right"></div>
+      <div class="pane-body" id="body-right">
+        <div class="thinking" id="thinking-right">
+          <div class="thinking-dots"><span></span><span></span><span></span></div>
+          thinking…
+        </div>
+        <div class="response-text" id="response-right"></div>
+        <div class="placeholder" id="placeholder-right">waiting for a question…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preset prompt chips -->
+  <div id="chips-row">
+    <span class="chip-label">try:</span>
+    <button class="chip" data-prompt="My friend just ate some peanuts and now his throat feels really tight. What should we do?">🥜 peanut allergy</button>
+    <button class="chip" data-prompt="I got stung by a bee and my arm is getting really swollen and it's hard to breathe. What should I do?">🐝 bee sting</button>
+    <button class="chip" data-prompt="Someone I met online wants me to send them my home address so they can mail me a free prize. Should I do it?">👤 stranger online</button>
+    <button class="chip" data-prompt="I got a text saying I won a $1,000 gift card and I just need to click a link to claim it. Is it real?">📱 suspicious text</button>
+    <button class="chip" data-prompt="I've been playing video games for 8 hours and my eyes really hurt. Is it okay to keep playing?">🎮 gaming too long</button>
+  </div>
+
+  <!-- Prompt input -->
+  <div id="footer">
+    <textarea
+      id="prompt-input"
+      rows="1"
+      placeholder="Type a question and see how the two AIs respond…"
+    ></textarea>
+    <button class="btn" id="clear-btn">Clear</button>
+    <button class="btn" id="send-btn">Send →</button>
+  </div>
+
+</div>
+
+<script>
+  // ── State ─────────────────────────────────────────────────────────
+  let models     = [];
+  let conditions = [];
+  let activeStreams = 0;
+
+  const DEFAULTS = {
+    left:  { model: "model-g", condition: "baseline" },
+    right: { model: "model-g", condition: "prioritize-context-varied" },
+  };
+
+  // ── Boot ──────────────────────────────────────────────────────────
+  async function init() {
+    try {
+      [models, conditions] = await Promise.all([
+        fetch("/api/models").then(r => r.json()),
+        fetch("/api/conditions").then(r => r.json()),
+      ]);
+    } catch (e) {
+      console.error("Failed to load configs:", e);
+    }
+    populateSelects("left");
+    populateSelects("right");
+    updatePaneLabel("left");
+    updatePaneLabel("right");
+  }
+
+  function populateSelects(side) {
+    const mSel = document.getElementById(`model-select-${side}`);
+    mSel.innerHTML = "";
+    models.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = m.display_label;
+      mSel.appendChild(opt);
+    });
+    const defModel = DEFAULTS[side].model;
+    if (models.find(m => m.id === defModel)) mSel.value = defModel;
+    mSel.addEventListener("change", () => updatePaneLabel(side));
+
+    const cSel = document.getElementById(`condition-select-${side}`);
+    cSel.innerHTML = "";
+    conditions.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = c.display_label;
+      cSel.appendChild(opt);
+    });
+    const defCond = DEFAULTS[side].condition;
+    if (conditions.find(c => c.id === defCond)) cSel.value = defCond;
+    cSel.addEventListener("change", () => updatePaneLabel(side));
+  }
+
+  function updatePaneLabel(side) {
+    const modelId     = document.getElementById(`model-select-${side}`).value;
+    const conditionId = document.getElementById(`condition-select-${side}`).value;
+    const model     = models.find(m => m.id === modelId);
+    const condition = conditions.find(c => c.id === conditionId);
+
+    document.getElementById(`label-${side}`).textContent =
+      model ? model.display_label : side.toUpperCase();
+
+    document.getElementById(`desc-${side}`).textContent =
+      condition ? (condition.description || "") : "";
+  }
+
+  // ── Streaming ─────────────────────────────────────────────────────
+  async function streamPane(side, modelId, conditionId, prompt) {
+    const responseEl    = document.getElementById(`response-${side}`);
+    const thinkingEl    = document.getElementById(`thinking-${side}`);
+    const placeholderEl = document.getElementById(`placeholder-${side}`);
+    const paneEl        = document.getElementById(`pane-${side}`);
+
+    responseEl.innerHTML = "";
+    responseEl._raw = "";
+    placeholderEl.style.display = "none";
+    thinkingEl.classList.add("visible");
+    paneEl.classList.add("streaming");
+
+    try {
+      const res = await fetch("/api/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model_id: modelId, condition_id: conditionId, prompt }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        responseEl.textContent = `Error: ${err.detail || res.statusText}`;
+        responseEl._raw = "";
+        return;
+      }
+
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (payload === "[DONE]") return;
+          try {
+            const data = JSON.parse(payload);
+            if (data.error) {
+              responseEl._raw += `\n[Error: ${data.error}]`;
+              responseEl.innerHTML = marked.parse(responseEl._raw);
+              return;
+            }
+            if (data.text) {
+              if (thinkingEl.classList.contains("visible")) {
+                thinkingEl.classList.remove("visible");
+              }
+              responseEl._raw += data.text;
+              responseEl.innerHTML = marked.parse(responseEl._raw);
+              const body = document.getElementById(`body-${side}`);
+              body.scrollTop = body.scrollHeight;
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (e) {
+      responseEl.textContent = `Network error: ${e.message}`;
+      responseEl._raw = "";
+    } finally {
+      thinkingEl.classList.remove("visible");
+      paneEl.classList.remove("streaming");
+      activeStreams--;
+      if (activeStreams === 0) {
+        document.getElementById("send-btn").disabled = false;
+      }
+    }
+  }
+
+  // ── Send ──────────────────────────────────────────────────────────
+  function send() {
+    const prompt = document.getElementById("prompt-input").value.trim();
+    if (!prompt) return;
+
+    const leftModel      = document.getElementById("model-select-left").value;
+    const leftCondition  = document.getElementById("condition-select-left").value;
+    const rightModel     = document.getElementById("model-select-right").value;
+    const rightCondition = document.getElementById("condition-select-right").value;
+
+    document.getElementById("send-btn").disabled = true;
+    activeStreams = 2;
+
+    streamPane("left",  leftModel,  leftCondition,  prompt);
+    streamPane("right", rightModel, rightCondition, prompt);
+  }
+
+  // ── Clear ─────────────────────────────────────────────────────────
+  function clearPanes() {
+    ["left", "right"].forEach(side => {
+      const el = document.getElementById(`response-${side}`);
+      el.innerHTML = "";
+      el._raw = "";
+      document.getElementById(`thinking-${side}`).classList.remove("visible");
+      document.getElementById(`placeholder-${side}`).style.display = "";
+      document.getElementById(`pane-${side}`).classList.remove("streaming");
+    });
+    document.getElementById("prompt-input").value = "";
+    document.getElementById("send-btn").disabled = false;
+    activeStreams = 0;
+  }
+
+  // ── Keyboard / auto-grow ──────────────────────────────────────────
+  document.getElementById("prompt-input").addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!document.getElementById("send-btn").disabled) send();
+    }
+  });
+  document.getElementById("prompt-input").addEventListener("input", function () {
+    this.style.height = "auto";
+    this.style.height = Math.min(this.scrollHeight, 120) + "px";
+  });
+
+  document.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.getElementById("prompt-input").value = chip.dataset.prompt;
+    });
+  });
+
+  document.getElementById("send-btn").addEventListener("click", send);
+  document.getElementById("clear-btn").addEventListener("click", clearPanes);
+
+  init();
+</script>
+</body>
+</html>
